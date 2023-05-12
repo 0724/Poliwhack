@@ -1,0 +1,85 @@
+//Copyright Michael Courtland McGLon 
+//Swift 5
+
+```
+import SpriteKit
+import UIKit
+
+class WhackSlot: SKNode {
+    
+    var charNode: Slot!
+    var visible = false
+    var isHit = false
+    
+    var Aarray: [String] = []
+    var Barray: [String] = []
+    
+    func configureAtPosition(pos: CGPoint) {
+        position = pos
+        
+        let sprite = SKSpriteNode(imageNamed: "whackHole")
+        sprite.size = CGSize(width: 100, height: 30)
+        addChild(sprite)
+        
+        let cropNode = SKCropNode()
+        cropNode.position = CGPoint(x: 0, y: 30)
+        cropNode.zPosition = 1
+        cropNode.maskNode = SKSpriteNode(imageNamed: "whackMask")
+        
+        charNode = Slot(imageNamed: Aarray[Int((RandomFloat(min: 0.0, max: Float(Aarray.count))))])
+        charNode.position = CGPoint(x: 0, y: -120)
+        charNode.name = "character"
+        cropNode.addChild(charNode)
+        
+        addChild(cropNode)
+    }
+    
+    func show(hideTime: Double) {
+        if visible { return }
+        
+        charNode.xScale = 0.5
+        charNode.yScale = 0.5
+        
+        charNode.run(SKAction.moveBy(x: 0, y: 100, duration: 0.05))
+        visible = true
+        isHit = false
+        
+        if Aarray[0] == Constants.Politician.DEMOCRAT.HILARY.IMAGE || Aarray[0] == Constants.Politician.DEMOCRAT.BERNIE.IMAGE || Aarray[0] == Constants.Politician.DEMOCRAT.OMALLY.IMAGE {
+            // do nothing
+        } else {
+            // do something
+        }
+        
+        if RandomInt(min: 0, max: 2) == 0 {
+            let name = Barray[Int((RandomFloat(min: 0.0, max: Float(Barray.count))))]
+            charNode.texture = SKTexture(imageNamed: name)
+            charNode.name = "charFriend"
+            charNode.id = name
+        } else {
+            charNode.texture = SKTexture(imageNamed: Aarray[Int((RandomFloat(min: 0.0, max: Float(Aarray.count))))])
+            charNode.name = "charEnemy"
+            charNode.id = ""
+        }
+        
+        RunAfterDelay(hideTime * 2.5) { [weak self] in
+            self?.hide()
+        }
+    }
+    
+    func hide() {
+        if !visible { return }
+        
+        charNode.run(SKAction.moveBy(x: 0, y: -100, duration: 0.05))
+        visible = false
+    }
+    
+    func hit() {
+        isHit = true
+        
+        let delay = SKAction.wait(forDuration: 0.25)
+        let hide = SKAction.moveBy(x: 0, y: -100, duration: 0.5)
+        let notVisible = SKAction.run { [unowned self] in self.visible = false }
+        charNode.run(SKAction.sequence([delay, hide, notVisible]))
+    }
+}
+```
