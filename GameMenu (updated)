@@ -1,0 +1,79 @@
+import Foundation
+import SpriteKit
+import UIKit
+
+class GameMenu: UIView {
+    
+    var politicianImageViews = [UIImageView]()
+    let skView = SKView()
+    var currentSelect: String?
+    
+    override func willMove(toSuperview newSuperview: UIView?) {
+        super.willMove(toSuperview: newSuperview)
+        
+        let politicianNames = [
+            Constants.Politician.DEMOCRAT.BERNIE.IMAGE,
+            Constants.Politician.DEMOCRAT.HILARY.IMAGE,
+            Constants.Politician.DEMOCRAT.OMALLY.IMAGE,
+            Constants.Politician.REPUBLICAN.CRUZ.IMAGE,
+            Constants.Politician.REPUBLICAN.CARLY.IMAGE,
+            Constants.Politician.REPUBLICAN.TRUMP.IMAGE,
+            Constants.Politician.REPUBLICAN.JEB.IMAGE,
+            Constants.Politician.REPUBLICAN.RUBIO.IMAGE,
+            Constants.Politician.REPUBLICAN.CARSON.IMAGE,
+            Constants.Politician.REPUBLICAN.JOHN.IMAGE,
+            Constants.Politician.REPUBLICAN.PAUL.IMAGE,
+            Constants.Politician.REPUBLICAN.CHRIST.IMAGE
+        ]
+        
+        for (index, politicianName) in politicianNames.enumerated() {
+            if let imageView = setupPolitician(with: politicianName, index: index) {
+                politicianImageViews.append(imageView)
+            }
+        }
+        
+        setupBackground()
+        
+        if let currentSelect = self.currentSelect,
+           let button = SKSpriteNode(imageNamed: currentSelect) {
+            button.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+            button.name = currentSelect
+            // button.zPosition = 100
+            // self.skView.scene?.addChild(button)
+        }
+    }
+    
+    func setupPolitician(with name: String, index: Int) -> UIImageView? {
+        let imageView = UIImageView(image: UIImage(named: name))
+        imageView.frame = CGRect(x: CGFloat(index + 1) * 50, y: 75, width: 50, height: 50)
+        imageView.contentMode = .scaleAspectFit
+        imageView.isUserInteractionEnabled = true
+        imageView.tag = index
+        self.addSubview(imageView)
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(headTapped(_:)))
+        imageView.addGestureRecognizer(tapRecognizer)
+        return imageView
+    }
+
+    @objc func headTapped(_ sender: UITapGestureRecognizer) {
+        guard let tappedImageView = sender.view as? UIImageView,
+              let tappedIndex = politicianImageViews.firstIndex(of: tappedImageView) else {
+            return
+        }
+        print("\(tappedIndex)")
+        let gameScene = GameScene(size: skView.scene!.size)
+        self.currentSelect = Constants.Politician.allCases[tappedIndex].IMAGE
+        gameScene.defender = self.currentSelect
+        let transition = SKTransition.flipVertical(withDuration: 1.0)
+        // gameScene.scaleMode = scaleMode
+        skView.presentScene(gameScene, transition: transition)
+    }
+    
+    func setupBackground() {
+        // let background = SKSpriteNode(imageNamed: "debateStage")
+        // background.position = CGPoint(x:self.size.width/2, y:self.size.height/2)
+        // self.addChild(background)
+        skView.frame = CGRect(x: 700, y: 0, width: 2048, height: 700)
+        skView.backgroundColor = .blue
+    }
+}
