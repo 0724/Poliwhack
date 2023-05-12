@@ -1,0 +1,42 @@
+import UIKit
+import GameKit
+
+class ViewController: UIViewController, GKGameCenterControllerDelegate {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
+    @IBAction func shareScore(_ sender: Any) {
+        // Create the message to share
+        let message = "I scored 100 points in my game!"
+        // Create the activity view controller
+        let activityViewController = UIActivityViewController(activityItems: [message], applicationActivities: nil)
+        // Present the activity view controller
+        present(activityViewController, animated: true, completion: nil)
+    }
+    
+    @IBAction func showLeaderboard(_ sender: Any) {
+        // Create the leaderboard view controller
+        let leaderboardViewController = GKGameCenterViewController()
+        // Set the leaderboard view controller's delegate to self
+        leaderboardViewController.gameCenterDelegate = self
+        // Set the leaderboard view controller's view state to show the leaderboard
+        leaderboardViewController.viewState = GKGameCenterViewControllerState.leaderboards
+        // Set the leaderboard identifier to your leaderboard identifier
+        leaderboardViewController.leaderboardIdentifier = "your_leaderboard_identifier"
+        // Present the leaderboard view controller
+        present(leaderboardViewController, animated: true, completion: nil)
+    }
+    
+    // Required by the GKGameCenterControllerDelegate protocol
+    func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
+        // Dismiss the leaderboard view controller
+        gameCenterViewController.dismiss(animated: true, completion: nil)
+    }
+    
+}
