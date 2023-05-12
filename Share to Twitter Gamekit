@@ -1,0 +1,28 @@
+import UIKit
+import GameKit
+import Social
+
+class ViewController: UIViewController, GKGameCenterControllerDelegate {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view.
+    }
+    
+    @IBAction func shareToTwitter() {
+        if let rootViewController = UIApplication.shared.keyWindow?.rootViewController {
+            let tweetComposer = SLComposeViewController(forServiceType: SLServiceTypeTwitter)
+            if let score = GKScore.localPlayerScore(for: "leaderboardID") {
+                tweetComposer?.setInitialText("I just scored \(score.value) points in my game!")
+            } else {
+                tweetComposer?.setInitialText("Check out my game!")
+            }
+            rootViewController.present(tweetComposer!, animated: true, completion: nil)
+        }
+    }
+
+    // MARK: GKGameCenterControllerDelegate
+    func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
+        gameCenterViewController.dismiss(animated: true, completion: nil)
+    }
+}
