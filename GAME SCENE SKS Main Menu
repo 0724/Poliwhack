@@ -1,0 +1,89 @@
+Here is the updated code to share to Twitter using the latest version of Swift and making sure there are no memory leaks:
+
+```swift
+import UIKit
+import SpriteKit
+import AVFoundation
+import Social
+
+class GameViewController: UIViewController {
+
+    var bgSoundPlayer: AVAudioPlayer?
+    var bgSoundVolume: Float = 1 // 0.5 would be 50% or half volume
+    var bgSoundLoops: Int = -1 // -1 will loop it forever
+    var bgSoundContinues: Bool = false
+    var scene: GameScene?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(playBackgroundSound), name: NSNotification.Name("PlayBackgroundSound"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(stopBackgroundSound), name: NSNotification.Name("StopBackgroundSound"), object: nil)
+        
+        let tableDataToLoad: String = "Table1" //tableDataToLoad the name of the dictionary in the property list defining all the table data
+        
+        var menuDataToLoad: String = "Home"
+        
+        let sksNameToLoad: String = Helpers.parsePropertyListForSKSToLoad(tableDataToLoad)
+        let fullSKSNameToLoad: String = Helpers.checkIfSKSExists(sksNameToLoad)
+        
+        if let scene = GameScene(fileNamed: fullSKSNameToLoad) {
+            self.scene = scene
+            let skView = self.view as! SKView
+            skView.showsFPS = false
+            skView.showsNodeCount = false
+            skView.showsPhysics = showPhysics
+            
+            /* Sprite Kit applies additional optimizations to improve rendering performance */
+            skView.ignoresSiblingOrder = true
+            
+            /* Set the scale mode to scale to fit the window */
+            scene.scaleMode = .aspectFill
+            scene.tableName = tableDataToLoad //the dictionary of table data (not always the sks name)
+            
+            skView.presentScene(scene)
+        } else if let dict = UserDefaults.standard.dictionary(forKey: "LaunchWithMenu"), dict["LaunchWithMenu"] != nil {
+            if let menu = dict["LaunchWithMenu"] as? String {
+                menuDataToLoad = menu
+            }
+            
+            let fullSKSNameToLoad: String = Helpers.checkIfMenuSKSExists(menuDataToLoad)
+            
+            if let scene = Menu(fileNamed: fullSKSNameToLoad) {
+                let skView = self.view as! SKView
+                skView.showsFPS = false
+                skView.showsNodeCount = false
+                skView.showsPhysics = showPhysics
+                
+                /* Sprite Kit applies additional optimizations to improve rendering performance */
+                skView.ignoresSiblingOrder = true
+                
+                /* Set the scale mode to scale to fit the window */
+                scene.scaleMode = .aspectFill
+                
+                scene.propertyListData = menuDataToLoad
+                
+                skView.presentScene(scene)
+            } else {
+                print("could not find the SKS file named \(fullSKSNameToLoad)")
+            }
+        }
+    }
+    
+    @objc func playBackgroundSound() {
+        let url = Bundle.main.url(forResource: "background_music", withExtension: "mp3")!
+        
+        do {
+            bgSoundPlayer = try AVAudioPlayer(contentsOf: url)
+            bgSoundPlayer?.numberOfLoops = bgSoundLoops
+            bgSoundPlayer?.volume = bgSoundVolume
+            bgSoundPlayer?.play()
+            bgSoundContinues = true
+        } catch {
+            print("Could not play sound file!")
+        }
+    }
+    
+    @objc func stopBackgroundSound() {
+        bgSoundPlayer?.stop()
